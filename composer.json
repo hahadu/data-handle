@@ -1,0 +1,28 @@
+{
+    "name": "hahadu/data-handle",
+    "description": "A database  array handle class",
+    "type": "library",
+    "require": {
+        "php": ">=5.4"
+    },
+    "require-dev": {
+        "php": ">=5.4"
+
+    },
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "hahadu",
+            "email": "582167246@qq.com"
+        }
+    ],
+    "autoload": {
+        "files": ["src/CoolePHP.php"],
+        "psr-4": {
+            "": "src/",
+            "hahadu\\data-handle\\": ""
+        }
+
+    },
+        "minimum-stability": "dev"
+}
