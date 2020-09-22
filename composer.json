@@ -18,9 +18,8 @@
     ],
     "autoload": {
         "psr-4": {
-            "Hahadu\\DataHandle\\Data\\": "src/"
+            "Hahadu\\DataHandle\\": "src/"
         }
-
     },
         "minimum-stability": "dev"
 }
