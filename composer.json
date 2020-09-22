@@ -17,7 +17,6 @@
         }
     ],
     "autoload": {
-        "files": ["src/CoolePHP.php"],
         "psr-4": {
             "": "src/",
             "hahadu\\DataHandle\\": ""
