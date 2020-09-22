@@ -17,7 +17,7 @@
 
 
 
-namespace hahadu\data-handle;
+namespace hahadu\DataHandle;
 final class Data
 {
     /**

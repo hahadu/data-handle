@@ -20,7 +20,7 @@
         "files": ["src/CoolePHP.php"],
         "psr-4": {
             "": "src/",
-            "hahadu\\data-handle\\": ""
+            "hahadu\\DataHandle\\": ""
         }
 
     },
