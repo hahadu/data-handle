@@ -18,8 +18,8 @@
     ],
     "autoload": {
         "psr-4": {
-            "": "src/",
-            "hahadu\\DataHandle\\Data": ""
+            "Hahadu\\DataHandle\\": "src/",
+            "Hahadu\\DataHandle\\": "Data"
         }
 
     },
