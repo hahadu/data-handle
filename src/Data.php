@@ -41,7 +41,7 @@ final class Data
                 $arr[$v[$fieldPri]] = $v;
                 $arr[$v[$fieldPri]]['_level'] = $level;
                 $arr[$v[$fieldPri]]['_html'] = str_repeat($html, $level - 1);
-                $arr[$v[$fieldPri]]["_data"] = self::channelLevel($data, $v[$fieldPri], $html, $fieldPri, $fieldPid, $level + 1);
+                $arr[$v[$fieldPri]]["_child"] = self::channelLevel($data, $v[$fieldPri], $html, $fieldPri, $fieldPid, $level + 1);
             }
         }
         return $arr;
