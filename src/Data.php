@@ -32,6 +32,7 @@ final class Data
      */
     public function __construct($data = [])
     {
+        //dump($data);
         if($data instanceof Collection){
             $this->items = $data;
         }else{
@@ -58,18 +59,16 @@ final class Data
         if ($this->items->isEmpty()) {
             return $this->items;
         }
-        $arr = new Collection();
-        $this->items->each(function ($item,$key)use($fieldPid,$pid,$fieldPri,$level,$html,$arr){
+        $arr = [];
+        foreach ($this->items as $item){
             if ($item[$fieldPid] == $pid) {
-                $arr->$item->$fieldPri = $item;
-                //$arr[$item[$fieldPri]] = $item;
-                $arr->$item->$fieldPri->_level = $level;
-                $arr->$item->$fieldPri->_html = str_repeat($html, $level - 1);
-                $arr->$item->$fieldPri->_child = $this->channelLevel($item[$fieldPri], $html, $fieldPri, $fieldPid, $level + 1);
+                $arr[$item[$fieldPri]] = $item;
+                $arr[$item[$fieldPri]]['_level'] = $level;
+                $arr[$item[$fieldPri]]['_html'] = str_repeat($html, $level - 1);
+                $arr[$item[$fieldPri]]['_child'] = $this->channelLevel($item[$fieldPri], $html, $fieldPri, $fieldPid, $level + 1);
             }
-
-        });
-        return $arr;
+        }
+        return new Collection($arr);
     }
 
     /**
@@ -82,9 +81,9 @@ final class Data
      * @param int $level 等级
      * @return Collection
      */
-    public function channelList($data, $pid = 0, $html = "&nbsp;", $fieldPri = 'cid', $fieldPid = 'pid', $level = 1)
+    public function channelList( $pid = 0, $html = "&nbsp;", $fieldPri = 'cid', $fieldPid = 'pid', $level = 1)
     {
-        $data = $this->_channelList($data, $pid, $html, $fieldPri, $fieldPid, $level);
+        $data = $this->_channelList( $pid, $html, $fieldPri, $fieldPid, $level);
         if ($data->isEmpty()){
             return $data;
         }
@@ -118,25 +117,23 @@ final class Data
      * @param int $level
      * @return Collection
      */
-    private function _channelList($data, $pid = 0, $html = "&nbsp;", $fieldPri = 'cid', $fieldPid = 'pid', $level = 1)
+    private function _channelList( $pid = 0, $html = "&nbsp;", $fieldPri = 'cid', $fieldPid = 'pid', $level = 1)
     {
-        if(false == ($data instanceof Collection)){
-            $data = new Collection($data);
-        }
-        if ($data->isEmpty()){
-            return $data;
+        if ($this->items->isEmpty()){
+            return $this->items;
         }
         $arr = new Collection();
-        foreach ($data as $v) {
-            $id = $v[$fieldPri];
-            if ($v[$fieldPid] == $pid) {
+        $this->items->each(function ($item,$key)use($arr,$fieldPri,$fieldPid,$pid,$level,$html){
+            $id = $item[$fieldPri];
+            if ($item[$fieldPid] == $pid) {
                 $v['_level'] = $level;
                 $v['_html'] = str_repeat($html, $level - 1);
                 $arr->push($v);
-                $tmp = $this->_channelList($data, $id, $html, $fieldPri, $fieldPid, $level + 1);
+                $tmp = $this->_channelList( $id, $html, $fieldPri, $fieldPid, $level + 1);
                 $arr->merge($tmp);
             }
-        }
+
+        });
         return $arr;
     }
 
@@ -148,10 +145,10 @@ final class Data
      * @param string $fieldPid 父id
      * @return Collection
      */
-    public function tree($data, $title, $fieldPri = 'cid', $fieldPid = 'pid')
+    public function tree( $title, $fieldPri = 'cid', $fieldPid = 'pid')
     {
 
-        $arr = $this->channelList($data, 0, '', $fieldPri, $fieldPid);
+        $arr = $this->channelList( 0, '', $fieldPri, $fieldPid);
         if ( $arr->isEmpty()){
             return $arr;
         }
