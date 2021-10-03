@@ -181,43 +181,41 @@ final class Data
 
     /**
      * 获得所有父级栏目
-     * @param $data 栏目数据
-     * @param $sid 子栏目
+     * @param int $sid 子栏目
      * @param string $fieldPri 唯一键名，如果是表则是表的主键
      * @param string $fieldPid 父ID键名
-     * @return array
+     * @return Collection
      */
-    public function parentChannel($data, $sid, $fieldPri = 'cid', $fieldPid = 'pid')
+    public function parentChannel($sid, $fieldPri = 'cid', $fieldPid = 'pid')
     {
-        if (empty($data)) {
-            return $data;
+        if ($this->items->isEmpty()) {
+            return $this->items;
         } else {
-            $arr = array();
-            foreach ($data as $v) {
+            $collect = Collection::make();
+            foreach ($this->items as $v) {
                 if ($v[$fieldPri] == $sid) {
-                    $arr[] = $v;
-                    $_n = $this->parentChannel($data, $v[$fieldPid], $fieldPri, $fieldPid);
+                    $collect->push($v);
+                    $_n = $this->parentChannel($v[$fieldPid], $fieldPri, $fieldPid);
                     if (!empty($_n)) {
-                        $arr = array_merge($arr, $_n);
+                        $collect->merge($_n);
                     }
                 }
             }
-            return $arr;
+            return $collect;
         }
     }
 
     /**
      * 判断$s_cid是否是$d_cid的子栏目
-     * @param $data 栏目数据
-     * @param $sid 子栏目id
-     * @param $pid 父栏目id
+     * @param int $sid 子栏目id
+     * @param int $pid 父栏目id
      * @param string $fieldPri 主键
      * @param string $fieldPid 父id字段
      * @return bool
      */
-    function isChild($data, $sid, $pid, $fieldPri = 'cid', $fieldPid = 'pid')
+    public function isChild( $sid, $pid, $fieldPri = 'cid', $fieldPid = 'pid')
     {
-        $_data = $this->channelList($data, $pid, '', $fieldPri, $fieldPid);
+        $_data = $this->channelList( $pid, '', $fieldPri, $fieldPid);
         foreach ($_data as $c) {
             //目标栏目为源栏目的子栏目
             if ($c[$fieldPri] == $sid)
@@ -228,14 +226,13 @@ final class Data
 
     /**
      * 检测是不否有子栏目
-     * @param $data 栏目数据
-     * @param $cid 要判断的栏目cid
+     * @param string $cid 要判断的栏目cid
      * @param string $fieldPid 父id表字段名
      * @return bool
      */
-    function hasChild($data, $cid, $fieldPid = 'pid')
+    public function hasChild( $cid, $fieldPid = 'pid')
     {
-        foreach ($data as $d) {
+        foreach ($this->items as $d) {
             if ($d[$fieldPid] == $cid) return true;
         }
         return false;
@@ -243,17 +240,17 @@ final class Data
 
     /**
      * 递归实现迪卡尔乘积
-     * @param $arr 操作的数组
      * @param array $tmp
      * @return array
      */
-    function descarte($arr, $tmp = array())
+    public function descarte( $tmp = array())
     {
         static $n_arr = array();
-        foreach (array_shift($arr) as $v) {
+
+        foreach ($this->items->shift() as $v) {
             $tmp[] = $v;
-            if ($arr) {
-                $this->descarte($arr, $tmp);
+            if ($this->items) {
+                $this->descarte($this->items, $tmp);
             } else {
                 $n_arr[] = $tmp;
             }
