@@ -19,6 +19,7 @@
 
 namespace Hahadu\DataHandle;
 use Hahadu\Collect\Collection;
+use http\Message\Body;
 
 final class Data
 {
@@ -84,9 +85,12 @@ final class Data
     public function channelList( $pid = 0, $html = "&nbsp;", $fieldPri = 'cid', $fieldPid = 'pid', $level = 1)
     {
         $data = $this->_channelList( $pid, $html, $fieldPri, $fieldPid, $level);
+        dump($data);
+
         if ($data->isEmpty()){
             return $data;
         }
+    //    $data->each(function ($m,$n){});
         foreach ($data as $n => $m) {
             if ($m['_level'] == 1)
                 continue;
@@ -122,18 +126,20 @@ final class Data
         if ($this->items->isEmpty()){
             return $this->items;
         }
-        $arr = new Collection();
-        $this->items->each(function ($item,$key)use($arr,$fieldPri,$fieldPid,$pid,$level,$html){
-            $id = $item[$fieldPri];
-            if ($item[$fieldPid] == $pid) {
+        $arr = Collection::make([]);
+        foreach ($this->items as $v) {
+            $id = $v[$fieldPri];
+            if ($v[$fieldPid] == $pid) {
                 $v['_level'] = $level;
                 $v['_html'] = str_repeat($html, $level - 1);
-                $arr->push($v);
-                $tmp = $this->_channelList( $id, $html, $fieldPri, $fieldPid, $level + 1);
-                $arr->merge($tmp);
-            }
+                $arr->push(Collection::make($v));
+                $tmp = $this->_channelList($id, $html, $fieldPri, $fieldPid, $level + 1);
+                $tmp->map(function ($item)use($arr){
+                    $arr->push($item);
+                });
 
-        });
+            }
+        }
         return $arr;
     }
 
@@ -149,6 +155,7 @@ final class Data
     {
 
         $arr = $this->channelList( 0, '', $fieldPri, $fieldPid);
+
         if ( $arr->isEmpty()){
             return $arr;
         }
@@ -171,6 +178,7 @@ final class Data
             }
             return $v;
         });
+        dump($arr);
         //设置主键为$fieldPri
         $data = new Collection();
         $arr->each(function ($item,$key)use($fieldPri,$data){
