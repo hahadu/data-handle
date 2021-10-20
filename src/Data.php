@@ -85,22 +85,20 @@ final class Data
     public function channelList( $pid = 0, $html = "&nbsp;", $fieldPri = 'cid', $fieldPid = 'pid', $level = 1)
     {
         $data = $this->_channelList( $pid, $html, $fieldPri, $fieldPid, $level);
-        dump($data);
 
         if ($data->isEmpty()){
             return $data;
         }
-    //    $data->each(function ($m,$n){});
         foreach ($data as $n => $m) {
             if ($m['_level'] == 1)
                 continue;
             $data[$n]['_first'] = false;
             $data[$n]['_end'] = false;
             if (!isset($data[$n - 1]) || $data[$n - 1]['_level'] != $m['_level']) {
-                $data[$n]['_first'] = true;
+                $data[$n]['_first'] = true; //子栏目第一条
             }
             if (isset($data[$n + 1]) && $data[$n]['_level'] > $data[$n + 1]['_level']) {
-                $data[$n]['_end'] = true;
+                $data[$n]['_end'] = true; //子栏目最后一条
             }
         }
         //更新key为栏目主键
@@ -126,21 +124,21 @@ final class Data
         if ($this->items->isEmpty()){
             return $this->items;
         }
-        $arr = Collection::make([]);
+        $collection = Collection::make([]);
         foreach ($this->items as $v) {
             $id = $v[$fieldPri];
             if ($v[$fieldPid] == $pid) {
                 $v['_level'] = $level;
                 $v['_html'] = str_repeat($html, $level - 1);
-                $arr->push(Collection::make($v));
+                $collection->push(Collection::make($v));
                 $tmp = $this->_channelList($id, $html, $fieldPri, $fieldPid, $level + 1);
-                $tmp->map(function ($item)use($arr){
-                    $arr->push($item);
+                $tmp->map(function ($item)use($collection){
+                    $collection->push($item);
                 });
 
             }
         }
-        return $arr;
+        return $collection;
     }
 
     /**
@@ -154,12 +152,12 @@ final class Data
     public function tree( $title, $fieldPri = 'cid', $fieldPid = 'pid')
     {
 
-        $arr = $this->channelList( 0, '', $fieldPri, $fieldPid);
+        $data = $this->channelList( 0, '', $fieldPri, $fieldPid);
 
-        if ( $arr->isEmpty()){
-            return $arr;
+        if ( $data->isEmpty()){
+            return $data;
         }
-        $arr = $arr->each(function ($v,$k)use($title,$arr){
+        $data = $data->each(function ($v,$k)use($title,$data){
             $str = "";
             if ($v['_level'] > 2) {
                 for ($i = 1; $i < $v['_level'] - 1; $i++) {
@@ -168,7 +166,7 @@ final class Data
             }
             if ($v['_level'] != 1) {
                 $t = $title ? $v[$title] : "";
-                if (isset($arr[$k + 1]) && $arr[$k + 1]['_level'] >= $v['_level']) {
+                if (isset($data[$k + 1]) && $data[$k + 1]['_level'] >= $v['_level']) {
                     $v['_name'] = $str . " &emsp; ├─ " . $v['_html'] . $t;
                 } else {
                     $v['_name'] = $str . " &emsp; └─ " . $v['_html'] . $t;
@@ -178,13 +176,12 @@ final class Data
             }
             return $v;
         });
-        dump($arr);
         //设置主键为$fieldPri
-        $data = new Collection();
-        $arr->each(function ($item,$key)use($fieldPri,$data){
-            $data->push($item,$item[$fieldPri]);
+        $tree = new Collection();
+        $data->each(function ($item,$key)use($fieldPri,$tree){
+            $tree->push($item,$item[$fieldPri]);
         });
-        return $data;
+        return $tree;
     }
 
     /**
